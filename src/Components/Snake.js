@@ -38,6 +38,27 @@ const YellowBall = styled(Cell)`
   border-radius: 50%;
 `;
 
+const StartText = styled.div`
+  font-size: 45px;
+  font-family: 'Pixelify Sans', sans-serif;
+  color: #002031;
+  text-shadow: -1px -1px #004d42;
+`;
+
+const GameOver = styled.h2`
+  font-size: 45px;
+  font-family: 'Pixelify Sans', sans-serif;
+  color: #002031;
+  text-shadow: -1px -1px #004d42;
+`;
+
+const Score = styled.div`
+  font-size: 25px;
+  font-family: 'Pixelify Sans', sans-serif;
+  color: #002031;
+  text-shadow: -1px -1px #004d42;
+`;
+
 class App extends Component {
   constructor() {
     super();
@@ -48,6 +69,7 @@ class App extends Component {
       direction: 'RIGHT',
       score: 0,
       gameStarted: false,
+      gameOver: false, // Add a gameOver state variable
     };
   }
 
@@ -56,6 +78,10 @@ class App extends Component {
     this.gameInterval = setInterval(this.moveSnake, 200);
     this.spawnYellowBall(); // Start spawning yellow balls
   }
+
+  isCollisionWithFood = (head, food) => {
+    return food && head.row === food.row && head.col === food.col;
+  };
 
   componentWillUnmount() {
     clearInterval(this.gameInterval);
@@ -113,18 +139,47 @@ class App extends Component {
       this.generateFood();
       this.setState({ score: score + 1 });
     } else if (this.isCollisionWithFood(head, yellowBall)) {
-      this.setState({ yellowBall: null, score: score + 2 }); // +2 for yellow ball
-      this.scheduleYellowBallSpawn(); // Schedule the next yellow ball spawn
+      this.setState({ yellowBall: null, score: score + 2 });
+      this.scheduleYellowBallSpawn();
     } else {
       newSnake.pop();
     }
 
-    this.setState({ snake: newSnake });
+    // Check for game over conditions
+    if (this.isGameOver(newSnake)) {
+      this.handleGameOver();
+    } else {
+      this.setState({ snake: newSnake });
+    }
   };
 
-  isCollisionWithFood(head, food) {
-    return food && head.row === food.row && head.col === food.col;
-  }
+  isGameOver = (snake) => {
+    // Check if the snake collides with the boundaries of the grid
+    const head = snake[0];
+    if (
+      head.row < 0 ||
+      head.row >= numRows ||
+      head.col < 0 ||
+      head.col >= numCols
+    ) {
+      return true;
+    }
+
+    // Check if the snake collides with itself
+    for (let i = 1; i < snake.length; i++) {
+      if (snake[i].row === head.row && snake[i].col === head.col) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  handleGameOver = () => {
+    clearInterval(this.gameInterval);
+    document.removeEventListener('keydown', this.handleKeyPress);
+    this.setState({ gameOver: true });
+  };
 
   generateFood = () => {
     const newFood = {
@@ -154,7 +209,7 @@ class App extends Component {
   };
 
   render() {
-    const { snake, food, yellowBall, score, gameStarted } = this.state;
+    const { snake, food, yellowBall, score, gameStarted, gameOver } = this.state;
 
     const grid = [];
     for (let i = 0; i < numRows; i++) {
@@ -173,17 +228,23 @@ class App extends Component {
 
     return (
       <div>
-        {gameStarted ? (
+        {gameOver ? (
           <div>
+            <GameOver>Game Over</GameOver>
+            <button onClick={this.handleRestart}>Restart</button>
+          </div>
+        ) : gameStarted ? (
+          <div>
+            <Score>Score: {score}</Score>
             <GameGrid>{grid}</GameGrid>
-            <div>Score: {score}</div>
           </div>
         ) : (
-          <div>Press an arrow key to start the game.</div>
+          <StartText>Press an arrow key to start the game.</StartText>
         )}
       </div>
     );
   }
 }
+
 
 export default App;
