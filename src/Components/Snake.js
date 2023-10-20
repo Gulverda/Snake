@@ -52,7 +52,30 @@ const GameOver = styled.h2`
   text-shadow: -1px -1px #004d42;
 `;
 
+const Restart = styled.button`
+  padding: 10px 20px;
+  font-size: 30px;
+  font-family: 'Pixelify Sans', sans-serif;
+  background-color: #02CFE6;
+  color: #002031;
+  text-shadow: -1px -1px #004d42;
+  border-radius: 25px;
+  cursor: pointer;
+  border: none;
+  &:hover {
+    background-color: #002031; // Change the background color on hover
+    color: #0240E6; // Change the text color on hover
+  }
+`;
+
 const Score = styled.div`
+  font-size: 25px;
+  font-family: 'Pixelify Sans', sans-serif;
+  color: #002031;
+  text-shadow: -1px -1px #004d42;
+`;
+
+const HighScore = styled.div`
   font-size: 25px;
   font-family: 'Pixelify Sans', sans-serif;
   color: #002031;
@@ -69,13 +92,15 @@ class App extends Component {
       direction: 'RIGHT',
       score: 0,
       gameStarted: false,
-      gameOver: false, // Add a gameOver state variable
+      gameOver: false,
+      highScore: 0, // Add a gameOver state variable
     };
   }
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyPress);
     this.gameInterval = setInterval(this.moveSnake, 200);
+    this.retrieveHighScore();
     this.spawnYellowBall(); // Start spawning yellow balls
   }
 
@@ -87,6 +112,14 @@ class App extends Component {
     clearInterval(this.gameInterval);
     document.removeEventListener('keydown', this.handleKeyPress);
   }
+
+  retrieveHighScore = () => {
+    const highScore = localStorage.getItem('highScore');
+    if (highScore) {
+      this.setState({ highScore: parseInt(highScore, 10) });
+    }
+  };
+  
 
   handleKeyPress = (event) => {
     if (!this.state.gameStarted) {
@@ -178,8 +211,20 @@ class App extends Component {
   handleGameOver = () => {
     clearInterval(this.gameInterval);
     document.removeEventListener('keydown', this.handleKeyPress);
+  
+    const { score, highScore } = this.state;
+  
+    if (score > highScore) {
+      // Update the high score in state
+      this.setState({ highScore: score });
+      
+      // Store the new high score in localStorage
+      localStorage.setItem('highScore', score.toString());
+    }
+  
     this.setState({ gameOver: true });
   };
+  
 
   generateFood = () => {
     const newFood = {
@@ -208,8 +253,27 @@ class App extends Component {
     }, delay);
   };
 
+  handleRestart = () => {
+    // Clear any existing game interval
+    clearInterval(this.gameInterval);
+  
+    // Reset the state to its initial values
+    this.setState({
+      snake: [{ row: 5, col: 5 }],
+      food: { row: 10, col: 10 },
+      yellowBall: null,
+      direction: 'RIGHT',
+      score: 0,
+      gameStarted: false,
+      gameOver: false,
+    });
+  
+    // Add an event listener for key presses to start the game when the player presses an arrow key again
+    document.addEventListener('keydown', this.handleKeyPress);
+  }
+
   render() {
-    const { snake, food, yellowBall, score, gameStarted, gameOver } = this.state;
+    const { snake, food, yellowBall, score, gameStarted, gameOver, highScore } = this.state;
 
     const grid = [];
     for (let i = 0; i < numRows; i++) {
@@ -231,12 +295,13 @@ class App extends Component {
         {gameOver ? (
           <div>
             <GameOver>Game Over</GameOver>
-            <button onClick={this.handleRestart}>Restart</button>
+            <Restart onClick={this.handleRestart}>Restart</Restart>
           </div>
         ) : gameStarted ? (
           <div>
-            <Score>Score: {score}</Score>
-            <GameGrid>{grid}</GameGrid>
+           <Score>Score: {score}</Score>
+           <HighScore>High Score: {highScore}</HighScore> {/* Add this line */}
+           <GameGrid>{grid}</GameGrid>
           </div>
         ) : (
           <StartText>Press an arrow key to start the game.</StartText>
