@@ -8,8 +8,9 @@ const GameGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(${numCols}, 25px);
   grid-template-rows: repeat(${numRows}, 25px);
-  background-color: #030303;
+  background: linear-gradient(to bottom, #4CAF50, #45A049);
 `;
+
 
 const Cell = styled.div`
   display: flex;
@@ -82,6 +83,11 @@ const HighScore = styled.div`
   text-shadow: -1px -1px #004d42;
 `;
 
+const ScoreAndHigh = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
 class App extends Component {
   constructor() {
     super();
@@ -146,9 +152,9 @@ class App extends Component {
   };
 
   moveSnake = () => {
-    const { snake, direction, food, score, yellowBall } = this.state;
+    const { snake, direction, food, score, yellowBall, gameStarted } = this.state;
     const head = Object.assign({}, snake[0]);
-
+  
     switch (direction) {
       case 'UP':
         head.row -= 1;
@@ -165,9 +171,9 @@ class App extends Component {
       default:
         break;
     }
-
+  
     const newSnake = [head, ...snake];
-
+  
     if (this.isCollisionWithFood(head, food)) {
       this.generateFood();
       this.setState({ score: score + 1 });
@@ -177,14 +183,14 @@ class App extends Component {
     } else {
       newSnake.pop();
     }
-
-    // Check for game over conditions
-    if (this.isGameOver(newSnake)) {
+  
+    if (gameStarted && this.isGameOver(newSnake)) {
       this.handleGameOver();
     } else {
       this.setState({ snake: newSnake });
     }
   };
+  
 
   isGameOver = (snake) => {
     // Check if the snake collides with the boundaries of the grid
@@ -207,23 +213,28 @@ class App extends Component {
 
     return false;
   };
-
   handleGameOver = () => {
     clearInterval(this.gameInterval);
     document.removeEventListener('keydown', this.handleKeyPress);
   
     const { score, highScore } = this.state;
+    let newHighScore = highScore;
   
     if (score > highScore) {
-      // Update the high score in state
-      this.setState({ highScore: score });
-      
+      // If the current score is higher than the high score, update the high score
+      newHighScore = score;
+  
       // Store the new high score in localStorage
-      localStorage.setItem('highScore', score.toString());
+      localStorage.setItem('highScore', newHighScore.toString());
     }
   
-    this.setState({ gameOver: true });
-  };
+    // Show a game over message with the final score and high score
+    this.setState({
+      gameOver: true,
+      highScore: newHighScore,
+    });
+  }
+  
   
 
   generateFood = () => {
@@ -299,9 +310,11 @@ class App extends Component {
           </div>
         ) : gameStarted ? (
           <div>
-           <Score>Score: {score}</Score>
-           <HighScore>High Score: {highScore}</HighScore> {/* Add this line */}
-           <GameGrid>{grid}</GameGrid>
+            <ScoreAndHigh>
+            <Score>Score: {score}</Score>
+            <HighScore>High Score: {highScore}</HighScore>
+           </ScoreAndHigh>
+            <GameGrid>{grid}</GameGrid>
           </div>
         ) : (
           <StartText>Press an arrow key to start the game.</StartText>
