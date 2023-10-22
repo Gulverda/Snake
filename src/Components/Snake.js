@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import gameOverSound from './assets/game-over.mp3';
+import backgroundMusic from './assets/background.mp3';
 
 const numRows = 20;
 const numCols = 20;
@@ -99,16 +101,27 @@ class App extends Component {
       score: 0,
       gameStarted: false,
       gameOver: false,
+      gameOverSound: new Audio(gameOverSound),
+      backgroundMusic: new Audio(backgroundMusic),
       highScore: 0, // Add a gameOver state variable
     };
   }
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyPress);
-    this.gameInterval = setInterval(this.moveSnake, 200);
     this.retrieveHighScore();
-    this.spawnYellowBall(); // Start spawning yellow balls
+    this.spawnYellowBall();
+
+    // Play background music and register click event for audio
+    this.state.backgroundMusic.play();
+    document.addEventListener('click', this.enableAudio);
   }
+
+  enableAudio = () => {
+    // Enable audio playback after a click event
+    this.state.backgroundMusic.play();
+    document.removeEventListener('click', this.enableAudio);
+  };
 
   isCollisionWithFood = (head, food) => {
     return food && head.row === food.row && head.col === food.col;
@@ -216,18 +229,21 @@ class App extends Component {
   handleGameOver = () => {
     clearInterval(this.gameInterval);
     document.removeEventListener('keydown', this.handleKeyPress);
-  
-    const { score, highScore } = this.state;
+
+    const { score, highScore, gameOverSound } = this.state;
     let newHighScore = highScore;
-  
+
     if (score > highScore) {
       // If the current score is higher than the high score, update the high score
       newHighScore = score;
-  
+
       // Store the new high score in localStorage
       localStorage.setItem('highScore', newHighScore.toString());
     }
-  
+
+    // Play the game over sound
+    gameOverSound.play();
+
     // Show a game over message with the final score and high score
     this.setState({
       gameOver: true,
@@ -311,9 +327,9 @@ class App extends Component {
         ) : gameStarted ? (
           <div>
             <ScoreAndHigh>
-            <Score>Score: {score}</Score>
-            <HighScore>High Score: {highScore}</HighScore>
-           </ScoreAndHigh>
+              <Score>Score: {score}</Score>
+              <HighScore>High Score: {highScore}</HighScore>
+            </ScoreAndHigh>
             <GameGrid>{grid}</GameGrid>
           </div>
         ) : (
@@ -323,6 +339,5 @@ class App extends Component {
     );
   }
 }
-
 
 export default App;
