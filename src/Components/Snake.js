@@ -113,7 +113,6 @@ class App extends Component {
     this.spawnYellowBall();
 
     // Play background music and register click event for audio
-    this.state.backgroundMusic.play();
     document.addEventListener('click', this.enableAudio);
   }
 
