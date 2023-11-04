@@ -1,11 +1,11 @@
 // import logo from './logo.svg';
-import Breakout from './components/Breakout';
+import MyComponent from './Components/Snake';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <Breakout/>
+      <MyComponent/>
     </div>
   );
 }
