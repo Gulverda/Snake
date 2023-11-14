@@ -1,4 +1,4 @@
-![plot](./Desktop/snkae.png)
+<img src="snake.png" height="60" width="60" >
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
