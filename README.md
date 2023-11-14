@@ -1,4 +1,4 @@
-<img src="[snake.png](https://cdn.discordapp.com/attachments/1106320638311944192/1174064174104580136/image.png?ex=65663b78&is=6553c678&hm=60371bf0a7a14c68ae8f185036c7e75dcee34c8150edbbfb0de7e449da3bfeaa&)" height="60" width="60" >
+<img src="[snake.png](https://cdn.discordapp.com/attachments/1106320638311944192/1174064174104580136/image.png?ex=65663b78&is=6553c678&hm=60371bf0a7a14c68ae8f185036c7e75dcee34c8150edbbfb0de7e449da3bfeaa&)">
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
